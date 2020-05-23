@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+ rides:
+  build: .
+  image: rides:latest
+  environment:
+   - TEAM_NAME=CC_0038_0180_0247_1295
+  container_name: rides
+  volumes:
+   - ./AreaNameEnum.csv:/AreaNameEnum.csv
+   - ./rides.py:/src/app.py
+   - type: volume
+     source: db
+     target: /src
+  networks:
+   - rideshare_rides
+  restart: always
+ rides-nginx:
+  image: nginx:latest
+  container_name: rides-nginx
+  ports:
+   - '80:80'
+  environment:
+   - TEAM_NAME=CC_0038_0180_0247_1295
+  volumes:
+   - ./nginx.conf:/etc/nginx/conf.d/default.conf
+  networks:
+   - rideshare_rides
+  restart: always
+
+networks:
+ rideshare_rides:
+  name: rideshare_rides
+
+volumes:
+ db:
+  name: db

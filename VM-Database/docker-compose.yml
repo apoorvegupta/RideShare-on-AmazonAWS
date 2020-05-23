@@ -1,0 +1,59 @@
+version: '3.7'
+
+services:
+ orchestrator:
+  build: ./orchestrator
+  image: orchestrator:latest
+  environment:
+   - TEAM_NAME=CC_0038_0180_0247_1295
+  container_name: orchestrator
+  ports:
+   - '80:5000'
+  depends_on:
+   - rabbitmq-server
+  tty: true
+  volumes:
+   - ./orchestrator/orchestrator.py:/src/app.py
+   - /usr/bin/docker:/usr/bin/docker
+   - /var/run/docker.sock:/var/run/docker.sock
+   - type: volume
+     source: db
+     target: /src
+   - type: volume
+     source: Shared
+     target: /Sharedvolume
+  networks:
+   - rabbitmq
+  restart: always
+
+ rabbitmq-server:
+  image: rabbitmq:3.6.12-management-alpine
+  hostname: rabbitmq-server
+  container_name: rabbitmq-server
+  ports:
+    - "5672:5672"
+    - "15672:15672"
+  networks:
+    - rabbitmq
+  restart: always
+
+ zookeeper:
+  container_name: zookeeper
+  environment:
+    - ZOO_MY_ID=1
+    - ZOO_SERVERS=server.1=0.0.0.0:2888:3888;2181
+  image: zookeeper:latest
+  hostname: zookeeper
+  networks:
+    - rabbitmq
+  restart: always
+
+networks:
+ rabbitmq:
+  name: rabbitmq
+
+volumes:
+  db:
+    name: db
+  Shared:
+    external: true
